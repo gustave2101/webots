@@ -8,10 +8,13 @@ PORT = 3306
 
 def echo(conn):
     connections.append(conn)
-    while data := conn.recv(1024):
-        for c in connections:
-            print('got', data)
-            c.sendall(data)
+    try:
+        while data := conn.recv(1024):
+            for c in connections:
+                print('got', data)
+                c.sendall(data)
+    except BrokenPipeError:
+        print('caught brokenpipeerror')
     print("Connection lost to", conn.getpeername())
     connections.remove(conn)
     
