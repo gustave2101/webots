@@ -14,7 +14,7 @@ def echo(conn):
                 print('got', data)
                 c.sendall(data)
     except:
-        print("Connection lost to", conn.getpeername())
+        print("Connection lost")
         connections.remove(conn)
     
 def accept_connections(s):
