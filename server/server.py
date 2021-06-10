@@ -3,8 +3,8 @@
 import socket
 import threading
 
-HOST = "192.168.137.1"
-PORT = 50000
+HOST = "145.24.222.172"
+PORT = 3306
 
 def echo(conn):
     connections.append(conn)
