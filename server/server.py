@@ -13,10 +13,9 @@ def echo(conn):
             for c in connections:
                 print('got', data)
                 c.sendall(data)
-    except BrokenPipeError:
-        print('caught brokenpipeerror')
-    print("Connection lost to", conn.getpeername())
-    connections.remove(conn)
+    except:
+        print("Connection lost to", conn.getpeername())
+        connections.remove(conn)
     
 def accept_connections(s):
     while True:
