@@ -11,11 +11,14 @@ port = 50000
 
 class Robot:
     def __init__(self, conn, addr):
-        self.name = conn.recv(1024).decode('utf-8')
+        incoming = conn.recv(1024).decode().split(' ', maxsplit=1)
+        print('incoming', incoming)
+        self.name = incoming[0]
+        self.position = incoming[1]
         self.conn = conn
         
-        print(f'{self.name} connected with address {addr}')
-        connections.append(conn)
+        print(f'{self.name} connected with address {addr} and is at {self.position}')
+        robots.append(self)
         runner = threading.Thread(target=self.run)
         runner.daemon = True
         runner.start()
@@ -23,19 +26,22 @@ class Robot:
     def run(self):
         try:
             while data := self.conn.recv(1024):
-                for c in connections:
-                    print(f'got {data} from {self.name}')
-                    c.sendall(data)
+                print(f'got {data} from {self.name}')
+                for r in robots:
+                    r.message(data)
         except:
             print(f'connection to {self.name} lost')
-            connections.remove(self.conn)
+            robots.remove(self)
+    
+    def message(self, text):
+        self.conn.sendall(text)
     
 def accept_connections(s):
     while True:
         conn, addr = s.accept()
         robot = Robot(conn, addr)
 
-connections = []
+robots = []
 s = socket.create_server((host, port))
 s.listen()
 
