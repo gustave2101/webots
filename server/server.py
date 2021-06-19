@@ -9,16 +9,24 @@ import threading
 host = "localhost"
 port = 50000
 
+def position_to_string(position):
+    return '[' + str(position[0]) + ', ' + str(position[1]) + ']'
+
+def position_from_string(position):
+    position = ''.join([c for c in position if c.isdigit() or c == ' '])
+    return position.split(' ', maxsplit=1)
+
 class Robot:
     def __init__(self, conn, addr):
-        incoming = conn.recv(1024).decode().split(' ', maxsplit=1)
-        print('incoming', incoming)
-        self.name = incoming[0]
-        self.position = incoming[1]
+        info = conn.recv(1024).decode().split(' ', maxsplit=1)
+        self.name = info[0]
+        self.position = position_from_string(info[1])
         self.conn = conn
         
         print(f'{self.name} connected with address {addr} and is at {self.position}')
+
         robots.append(self)
+
         runner = threading.Thread(target=self.run)
         runner.daemon = True
         runner.start()
@@ -26,15 +34,11 @@ class Robot:
     def run(self):
         try:
             while data := self.conn.recv(1024):
-                print(f'got {data} from {self.name}')
-                for r in robots:
-                    r.message(data)
-        except:
+                self.position = position_from_string(data.decode())
+                print(f'{self.name} is at {self.position}')
+        except (ConnectionResetError, ConnectionAbortedError):
             print(f'connection to {self.name} lost')
             robots.remove(self)
-    
-    def message(self, text):
-        self.conn.sendall(text)
     
 def accept_connections(s):
     while True:
