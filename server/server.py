@@ -25,8 +25,6 @@ class Robot:
         self.order = None
         self.target = None
 
-        robots.append(self)
-
         print(f'{self.name} connected with address {addr} and is at {self.position}')
     
     def give_order(self, order):
@@ -36,7 +34,7 @@ class Robot:
 def accept_connections(s):
     while True:
         conn, addr = s.accept()
-        robot = Robot(conn, addr)
+        connection_requests.append((conn, addr))
 
 def handle_input():
     print('enter \'q\' to exit')
@@ -50,41 +48,46 @@ def handle_input():
             )
 
 def tick():
-    if not robots:
-        return
-
-    if orders:
-        for robot in robots:
-            if robot.target == None:
-                order = orders.pop()
-                robot.give_order(order)
-                print(f'assigned {order} to {robot.name}')
+    if connection_requests:
+        conn, addr = connection_requests.pop()
+        robots.append(Robot(conn, addr))
 
     for robot in robots:
-        try:
-            if robot.target != None:
-                print(f'sending {robot.target} to {robot.name}')
-                robot.conn.sendall(position_to_string(robot.target).encode())
+        if not orders:
+            break
 
-                print(f'waiting for response from {robot.name}')
-                data = robot.conn.recv(1024)
-                robot.position = position_from_string(data.decode())
-                print(f'{robot.name} is at {robot.position}')
+        order = orders.pop()
+        robot.give_order(order)
+        print(f'assigned {order} to {robot.name}')
+    
+    # first send all
+    # then receive all
+    try:
+        for robot in robots:
+            target = robot.target if robot.target != None else robot.position
+            print(f'sending {target} to {robot.name}')
+            robot.conn.sendall(position_to_string(target).encode())
+        
+        for robot in robots:
+            print(f'waiting for response from {robot.name}')
+            data = robot.conn.recv(1024)
+            robot.position = position_from_string(data.decode())
+            print(f'{robot.name} is at {robot.position}')
 
-                if robot.position == robot.target:
-                    if robot.position == robot.order[0]:
-                        # switch to destination
-                        robot.target = robot.order[1]
-                        print(f'{robot.name} got package at {robot.position}')
-                    else:
-                        # done with order
-                        robot.target = None
-                        robot.order = None
-                        print(f'{robot.name} delivered package at {robot.position}')
-            
-        except (ConnectionResetError, ConnectionAbortedError):
-            print(f'connection to {robot.name} lost')
-            robots.remove(robot)
+            if robot.position == robot.target:
+                if robot.position == robot.order[0]:
+                    # switch to destination
+                    robot.target = robot.order[1]
+                    print(f'{robot.name} got package at {robot.position}')
+                else:
+                    # done with order
+                    robot.target = None
+                    robot.order = None
+                    print(f'{robot.name} delivered package at {robot.position}')
+
+    except (ConnectionResetError, ConnectionAbortedError):
+        print(f'connection to {robot.name} lost')
+        robots.remove(robot)
 
 def run():
     while True:
@@ -97,6 +100,7 @@ orders = [
     ((2, 0), (0, 0))
 ]
 
+connection_requests = []
 robots = []
 s = socket.create_server((host, port))
 s.listen()
