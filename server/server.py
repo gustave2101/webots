@@ -32,6 +32,18 @@ class Robot:
         self.order = order
         self.target = order[0]
     
+    def next_position(self):
+        path = world.dijkstra(self.position, self.target)
+
+        if not path: 
+            #robot has to send position
+            return self.position
+        else:
+
+            print(path[0]) # else return next position
+            return path[0]
+
+
 def accept_connections(s):
     while True:
         conn, addr = s.accept()
@@ -68,7 +80,8 @@ def tick():
             target = robot.target if robot.target != None else robot.position
             print(f'sending {target} to {robot.name}')
             robot.conn.sendall(position_to_string(target).encode())
-            print(world.dijkstra(robot.position, robot.target))
+            print(robot.next_position())
+            
         
         for robot in robots:
             print(f'waiting for response from {robot.name}')
