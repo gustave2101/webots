@@ -2,6 +2,7 @@
 
 import socket
 import threading
+import dijkstra as dk
 
 # host = "145.24.222.172"
 # port = 3306
@@ -67,6 +68,7 @@ def tick():
             target = robot.target if robot.target != None else robot.position
             print(f'sending {target} to {robot.name}')
             robot.conn.sendall(position_to_string(target).encode())
+            print(world.dijkstra(robot.position, robot.target))
         
         for robot in robots:
             print(f'waiting for response from {robot.name}')
@@ -97,8 +99,25 @@ orders = [
     ((1, 2), (3, 4)),
     ((4, 2), (1, 1)),
     ((3, 1), (0, 4)),
-    ((2, 0), (0, 0))
+    ((4, 0), (0, 0))
 ]
+
+world = dk.Map([
+#     0    1    2    3    4    5   6    7    8    9   10
+    ['.', '.', '.', '.', '.','.', '.', '.', '.', '.','.'], # 0
+    ['.', '.', '.', '.', '.','.', '.', '.', '.', '.','.'], # 1
+    ['.', '.', 'O', 'O', 'O', 'O', 'O', 'O', 'O','.','.'],
+    ['.', '.', '.', '.', '.','.', '.', '.', '.', '.','.'],
+    ['.', '.', 'O', 'O', 'O', 'O', 'O', 'O', 'O','.','.'], #4
+    ['.', '.', '.', '.', '.','.', '.', '.', '.', '.','.'],
+    ['.', '.', 'O', '.', 'O','.', 'O', '.', 'O', '.','.'],
+    ['.', '.', 'O', '.', 'O','.', 'O', '.', 'O', '.','.'],
+    ['.', '.', 'O', '.', 'O','.', 'O', '.', 'O', '.','.'], #8
+    ['.', '.', '.', '.', '.','.', '.', '.', '.', '.','.'],
+    ['.', '.', '.', '.', '.','.', '.', '.', '.', '.','.'],#10
+  
+    
+])
 
 connection_requests = []
 robots = []

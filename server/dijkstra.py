@@ -95,6 +95,7 @@ class Map:
                     path.append(current_position)
                     current_position = self.at(current_position).previous # trace back
                 path.reverse() # convert from last to first
+                path.pop(0) #REMOVE start
                 return path
 
     # calculates the dimensions of a text map, raises error if the map is jagged
@@ -109,28 +110,21 @@ class Map:
         
         return width, height
 
-map = Map([
-#     0    1    2    3    4
-    ['.', '.', '.', '.', '.'], # 0
-    ['.', '.', 'O', '.', '.'], # 1
-    ['.', 'O', 'O', '.', '.'], # 2
-    ['.', 'O', '.', '.', '.'], # 3
-    ['.', 'O', '.', '.', '.'], # 4
-])
 
-path = map.dijkstra((0, 0), (2,3))
-print(path)
 
-targets = ((9,9),(9,8))
+# path = map.dijkstra((0, 0), (2,3))
+# print(path)
 
-def calc_number_of_steps(path):
+# targets = ((9,9),(9,8))
 
-    return len(path)
+# def calc_number_of_steps(path):
 
-print(calc_number_of_steps(path))
+#     return len(path)
 
-distances_to_targets = {
-	'robot_1': { '1,1': 23, '9,8': 14} # "target:" : nr_of_steps
-}
+# print(calc_number_of_steps(path))
+
+# distances_to_targets = {
+# 	'robot_1': { '1,1': 23, '9,8': 14} # "target:" : nr_of_steps
+# }
 
 #print(algorithm.find_matching(H, matching_type = 'min', return_type = 'list' ))
