@@ -73,9 +73,10 @@ def tick():
         if not orders:
             break
 
-        order = orders.pop()
-        robot.give_order(order)
-        print(f'assigned {order} to {robot.name}')
+        if robot.order == None:
+            order = orders.pop()
+            robot.give_order(order)
+            print(f'assigned {order} to {robot.name}')
     
     # first send all
     # then receive all
