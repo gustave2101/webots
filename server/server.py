@@ -25,6 +25,7 @@ class Robot:
         self.conn = conn
         self.order = None
         self.target = None
+        self.next_step = None
 
         print(f'{self.name} connected with address {addr} and is at {self.position}')
     
@@ -78,9 +79,10 @@ def tick():
     try:
         for robot in robots:
             target = robot.target if robot.target != None else robot.position
-            print(f'sending {target} to {robot.name}')
-            robot.conn.sendall(position_to_string(target).encode())
-            print(robot.next_position())
+            robot.next_step = robot.next_position()
+            print(f'sending {robot.next_step} to {robot.name}')
+            robot.conn.sendall(position_to_string(robot.next_step).encode())
+            #print(robot.next_position())
             
         
         for robot in robots:
