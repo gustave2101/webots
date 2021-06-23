@@ -27,7 +27,7 @@ class Robot:
         self.position = position_from_string(info[1])
         self.conn = conn
         self.order = None
-        self.target = None
+        self.target = self.position
         self.next_step = None
 
         print(f'{self.name} connected with address {addr} and is at {self.position}')
@@ -131,9 +131,9 @@ def run():
 
 orders = [
     ((9, 8), (10, 6)),
-    #((9, 2), (2, 5)),
-    #((6, 3), (1, 8)),
-    #((8, 0), (5, 3))
+    ((9, 2), (2, 5)),
+    ((6, 3), (1, 8)),
+    ((8, 0), (5, 3))
 ]
 
 world = dk.Map([
