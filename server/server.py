@@ -52,6 +52,8 @@ def accept_connections(s):
         connection_requests.append((conn, addr))
 
 def handle_input():
+    global paused
+
     print('enter \'q\' to exit')
     while True:
         cmd = input()
@@ -61,6 +63,9 @@ def handle_input():
             orders.append(
                 ((1, 2), (7, 7))
             )
+        elif cmd == 'p':
+            paused = not paused
+            print(f'paused: {paused}')
 
 def tick():
     if connection_requests:
@@ -106,7 +111,8 @@ def tick():
 
 def run():
     while True:
-        tick()
+        if not paused:
+            tick()
 
 orders = [
     ((9, 8), (10, 6)),
@@ -132,6 +138,7 @@ world = dk.Map([
     
 ])
 
+paused = False
 connection_requests = []
 robots = []
 s = socket.create_server((host, port))
