@@ -14,7 +14,10 @@ def position_to_string(position):
     return str(position)
 
 def position_from_string(position):
-    return tuple(map(int, filter(str.isdigit, position)))
+    filtered = ''.join([c for c in position if c.isdigit() or c == ' '])
+    split = filtered.split(' ')
+    nums = tuple(map(int, split))
+    return nums
 
 class Robot:
     def __init__(self, conn, addr):
@@ -34,17 +37,12 @@ class Robot:
         self.target = order[0]
     
     def next_position(self):
-        if self.target == None:
-            return self.position
-        
         path = world.dijkstra(self.position, self.target)
+        print(f'{self.name} path: {path}')
 
-        if not path: 
-            #robot has to send position
+        if not path: # happens when the position == the target
             return self.position
         else:
-
-            print(path[0]) # else return next position
             return path[0]
 
 
@@ -82,12 +80,9 @@ def tick():
     # then receive all
     try:
         for robot in robots:
-            target = robot.target if robot.target != None else robot.position
-            robot.next_step = robot.next_position()
-            print(f'sending {robot.next_step} to {robot.name}')
-            robot.conn.sendall(position_to_string(robot.next_step).encode())
-            #print(robot.next_position())
-            
+            next_step = robot.next_position()
+            print(f'sending {next_step} to {robot.name}')
+            robot.conn.sendall(position_to_string(next_step).encode())
         
         for robot in robots:
             print(f'waiting for response from {robot.name}')
@@ -95,14 +90,13 @@ def tick():
             robot.position = position_from_string(data.decode())
             print(f'{robot.name} is at {robot.position}')
 
-            if robot.position == robot.target:
+            if robot.position == robot.target and robot.order != None:
                 if robot.position == robot.order[0]:
                     # switch to destination
                     robot.target = robot.order[1]
                     print(f'{robot.name} got package at {robot.position}')
                 else:
                     # done with order
-                    robot.target = None
                     robot.order = None
                     print(f'{robot.name} delivered package at {robot.position}')
 
@@ -137,8 +131,6 @@ world = dk.Map([
   
     
 ])
-
-print(world.dijkstra((0, 0), None))
 
 connection_requests = []
 robots = []
