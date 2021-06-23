@@ -1,4 +1,4 @@
-from hungarian_algorithm import algorithm
+#from hungarian_algorithm import algorithm
 
 INF = float('inf')
 
@@ -8,6 +8,11 @@ class Tile:
         self.distance = INF
         self.previous = None
         self.is_obstacle = is_obstacle
+    
+    def reset(self):
+        self.visited = False
+        self.distance = INF
+        self.previous = None
 
 class Map:
     def __init__(self, text_map):
@@ -53,6 +58,12 @@ class Map:
         return neighbors
     
     def dijkstra(self, source, destination):
+        if self.at(source).is_obstacle:
+            raise ValueError('error: start ' + str(source) + ' is an obstacle')
+        
+        if self.at(destination).is_obstacle:
+            raise ValueError('error: end ' + str(destination) + ' is an obstacle')
+
         self.at(source).distance = 0 # start gets a distance of 0
 
         while True:
@@ -74,6 +85,9 @@ class Map:
                         current_position = (x, y)
                         current_distance = tile.distance
             
+            if current_position == None:
+                raise ValueError('algorithm has visited all tiles without finding a path')
+            
             # mark tile as visited
             self.at(current_position).visited = True
             
@@ -94,8 +108,13 @@ class Map:
                 while current_position != None:
                     path.append(current_position)
                     current_position = self.at(current_position).previous # trace back
+                
                 path.reverse() # convert from last to first
-                path.pop(0) #REMOVE start
+                path.pop(0) # remove start
+
+                for tile in self.tiles:
+                    tile.reset() # cleanup
+
                 return path
 
     # calculates the dimensions of a text map, raises error if the map is jagged
