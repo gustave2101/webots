@@ -34,6 +34,9 @@ class Robot:
         self.target = order[0]
     
     def next_position(self):
+        if self.target == None:
+            return self.position
+        
         path = world.dijkstra(self.position, self.target)
 
         if not path: 
@@ -133,6 +136,8 @@ world = dk.Map([
   
     
 ])
+
+print(world.dijkstra((0, 0), None))
 
 connection_requests = []
 robots = []
