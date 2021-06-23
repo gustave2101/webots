@@ -54,18 +54,31 @@ def accept_connections(s):
 def handle_input():
     global paused
 
-    print('enter \'q\' to exit')
+    print('enter \'quit\' or \'q\' to exit')
+    print('enter \'pause\' or \'p\' to pause')
+    print('enter \'add [x0] [y0] [x1] [y1]\' to add an order')
+
     while True:
-        cmd = input()
-        if cmd == 'q':
+        line = input().split(' ')
+        cmd, args = line[0], line[1:]
+        if cmd == 'quit' or cmd == 'q':
             break
         elif cmd == 'add':
-            orders.append(
-                ((1, 2), (7, 7))
-            )
-        elif cmd == 'p':
+            if len(args) != 4:
+                print('usage: add [x0] [y0] [x1] [y1]')
+            else:
+                try:
+                    x0, y0, x1, y1 = int(args[0]), int(args[1]), int(args[2]), int(args[3])
+                    order = ((x0, y0), (x1, y1))
+                    orders.append(order)
+                    print(f'added order {order}')
+                except ValueError:
+                    print('error: could not convert input to position')
+        elif cmd == 'pause' or cmd == 'p':
             paused = not paused
             print(f'paused: {paused}')
+        else:
+            print('unknown command')
 
 def tick():
     if connection_requests:
@@ -86,6 +99,8 @@ def tick():
     try:
         for robot in robots:
             next_step = robot.next_position()
+            if next_step == None:
+                print('AAAAAA')
             print(f'sending {next_step} to {robot.name}')
             robot.conn.sendall(position_to_string(next_step).encode())
         
@@ -116,9 +131,9 @@ def run():
 
 orders = [
     ((9, 8), (10, 6)),
-    ((9, 2), (2, 5)),
-    ((6, 3), (1, 8)),
-    ((8, 0), (5, 3))
+    #((9, 2), (2, 5)),
+    #((6, 3), (1, 8)),
+    #((8, 0), (5, 3))
 ]
 
 world = dk.Map([
