@@ -3,6 +3,7 @@
 import socket
 import threading
 import dijkstra as dk
+import random
 
 # host = "145.24.222.172"
 # port = 3306
@@ -37,13 +38,33 @@ class Robot:
         self.target = order[0]
     
     def next_position(self):
-        path = world.dijkstra(self.position, self.target)
-        print(f'{self.name} path: {path}')
+        if self.order == None:
+            print(f'{self.name} has no order and will move randomly')
+            return self.random_step()
+        
+        try:
+            path = world.dijkstra(self.position, self.target)
+            print(f'{self.name} path: {path}')
+        except dk.NoPathError as e:
+            print(e.message)
+            print(f'falling back on current position')
+            return self.position
 
         if not path: # happens when the position == the target
             return self.position
         else:
             return path[0]
+    
+    def random_step(self):
+        while True:
+            possibilities = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+            step = possibilities[random.randint(0, len(possibilities) - 1)]
+            position = (self.position[0] + step[0], self.position[1] + step[1])
+            if (
+                not (world.at(position).is_obstacle or world.at(position).is_temporary_obstacle)
+                and world.in_bounds(position)
+            ):
+                return position
 
 
 def accept_connections(s):
@@ -56,6 +77,7 @@ def handle_input():
 
     print('enter \'quit\' or \'q\' to exit')
     print('enter \'pause\' or \'p\' to pause')
+    print('enter \'\orders\' or \'o\' to view all unhandled orders')
     print('enter \'add [x0] [y0] [x1] [y1]\' to add an order')
 
     while True:
@@ -77,6 +99,8 @@ def handle_input():
         elif cmd == 'pause' or cmd == 'p':
             paused = not paused
             print(f'paused: {paused}')
+        elif cmd == 'orders' or cmd == 'o':
+            print(orders)
         else:
             print('unknown command')
 
@@ -99,10 +123,9 @@ def tick():
     try:
         for robot in robots:
             next_step = robot.next_position()
-            if next_step == None:
-                print('AAAAAA')
-            print(f'sending {next_step} to {robot.name}')
+            print(f'sending {next_step} to {robot.name} (and reserving spot)')
             robot.conn.sendall(position_to_string(next_step).encode())
+            world.set_temporary_obstacle(next_step)
         
         for robot in robots:
             print(f'waiting for response from {robot.name}')
@@ -123,6 +146,10 @@ def tick():
     except (ConnectionResetError, ConnectionAbortedError):
         print(f'connection to {robot.name} lost')
         robots.remove(robot)
+    
+    world.clear_temporary_obstacles()
+    if robots:
+        print('')
 
 def run():
     while True:
@@ -130,10 +157,9 @@ def run():
             tick()
 
 orders = [
-    ((9, 8), (10, 6)),
-    ((9, 2), (2, 5)),
-    ((6, 3), (1, 8)),
-    ((8, 0), (5, 3))
+    ((6, 3), (7, 3)),
+    ((2, 3), (1, 3)),
+    ((0, 0), (1, 1))
 ]
 
 world = dk.Map([

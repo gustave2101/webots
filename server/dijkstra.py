@@ -1,6 +1,8 @@
-#from hungarian_algorithm import algorithm
-
 INF = float('inf')
+
+class NoPathError(Exception):
+    def __init__(self, message):
+        self.message = message
 
 class Tile:
     def __init__(self, is_obstacle):
@@ -8,11 +10,13 @@ class Tile:
         self.distance = INF
         self.previous = None
         self.is_obstacle = is_obstacle
+        self.is_temporary_obstacle = False
     
     def reset(self):
         self.visited = False
         self.distance = INF
         self.previous = None
+        self.is_temporary_obstacle = False
 
 class Map:
     def __init__(self, text_map):
@@ -80,7 +84,7 @@ class Map:
                     # and ignore visited tiles and obstacles
                     if (
                         (tile.distance < current_distance or current_position == None)
-                        and not (tile.visited or tile.is_obstacle)
+                        and not (tile.visited)
                     ):
                         current_position = (x, y)
                         current_distance = tile.distance
@@ -95,7 +99,7 @@ class Map:
             neighbor_positions = self.neighbors(current_position)
 
             for position in neighbor_positions:
-                if not self.at(position).is_obstacle:
+                if not (self.at(position).is_obstacle or self.at(position).is_temporary_obstacle):
                     tile = self.at(position)
                     distance = current_distance + 1 # all edges have a length of 1
                     if distance < tile.distance: # update distance if it is smaller
@@ -109,6 +113,9 @@ class Map:
                     path.append(current_position)
                     current_position = self.at(current_position).previous # trace back
                 
+                if source not in path or destination not in path:
+                    raise NoPathError(f'could not find path from {source} to {destination}')
+
                 path.reverse() # convert from last to first
                 path.pop(0) # remove start
 
@@ -128,6 +135,13 @@ class Map:
                 raise ValueError('jagged list')
         
         return width, height
+    
+    def set_temporary_obstacle(self, position):
+        self.at(position).is_temporary_obstacle = True
+    
+    def clear_temporary_obstacles(self):
+        for tile in self.tiles:
+            tile.is_temporary_obstacle = False
 
 
 
