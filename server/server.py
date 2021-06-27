@@ -77,7 +77,7 @@ def handle_input():
 
     print('enter \'quit\' or \'q\' to exit')
     print('enter \'pause\' or \'p\' to pause')
-    print('enter \'\orders\' or \'o\' to view all unhandled orders')
+    print('enter \'\orders\' or \'o\' to view all orders')
     print('enter \'add [x0] [y0] [x1] [y1]\' to add an order')
 
     while True:
@@ -100,7 +100,12 @@ def handle_input():
             paused = not paused
             print(f'paused: {paused}')
         elif cmd == 'orders' or cmd == 'o':
-            print(orders)
+            print(f'handled orders: {handled_orders}')
+            print(f'unhandled orders: {orders}')
+            print('orders in progress:')
+            for robot in robots:
+                if robot.order != None:
+                    print(f'{robot.name} is handling {robot.order}')
         else:
             print('unknown command')
 
@@ -140,6 +145,7 @@ def tick():
                     print(f'{robot.name} got package at {robot.position}')
                 else:
                     # done with order
+                    handled_orders.append(robot.order)
                     robot.order = None
                     print(f'{robot.name} delivered package at {robot.position}')
 
@@ -161,6 +167,8 @@ orders = [
     ((2, 3), (1, 3)),
     ((0, 0), (1, 1))
 ]
+
+handled_orders = list()
 
 world = dk.Map([
 #     0    1    2    3    4    5    6    7    8    9   10
