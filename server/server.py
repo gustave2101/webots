@@ -85,7 +85,7 @@ def handle_input():
         cmd, args = line[0], line[1:]
         if cmd == 'quit' or cmd == 'q':
             break
-        elif cmd == 'add':
+        elif cmd == 'add' or cmd == 'a':
             if len(args) != 4:
                 print('usage: add [x0] [y0] [x1] [y1]')
             else:
