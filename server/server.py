@@ -78,7 +78,7 @@ def handle_input():
     print('enter \'quit\' or \'q\' to exit')
     print('enter \'pause\' or \'p\' to pause')
     print('enter \'\orders\' or \'o\' to view all orders')
-    print('enter \'add [x0] [y0] [x1] [y1]\' to add an order')
+    print('enter \'add [x0] [y0] [x1] [y1]\' or \'a [x0] [y0] [x1] [y1]\' to add an order')
 
     while True:
         line = input().split(' ')
