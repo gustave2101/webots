@@ -61,8 +61,8 @@ class Robot:
             step = possibilities[random.randint(0, len(possibilities) - 1)]
             position = (self.position[0] + step[0], self.position[1] + step[1])
             if (
-                not (world.at(position).is_obstacle or world.at(position).is_temporary_obstacle)
-                and world.in_bounds(position)
+                world.in_bounds(position)
+                and not (world.at(position).is_obstacle or world.at(position).is_temporary_obstacle)
             ):
                 return position
 
@@ -77,7 +77,7 @@ def handle_input():
 
     print('enter \'quit\' or \'q\' to exit')
     print('enter \'pause\' or \'p\' to pause')
-    print('enter \'\orders\' or \'o\' to view all orders')
+    print('enter \'orders\' or \'o\' to view all orders')
     print('enter \'add [x0] [y0] [x1] [y1]\' or \'a [x0] [y0] [x1] [y1]\' to add an order')
 
     while True:
@@ -110,7 +110,7 @@ def handle_input():
             print('unknown command')
 
 def tick():
-    if connection_requests:
+    while connection_requests:
         conn, addr = connection_requests.pop()
         robots.append(Robot(conn, addr))
 
