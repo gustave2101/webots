@@ -90,7 +90,7 @@ class Map:
                         current_distance = tile.distance
             
             if current_position == None:
-                raise ValueError('algorithm has visited all tiles without finding a path')
+                raise NoPathError(f'could not find path from {source} to {destination}')
             
             # mark tile as visited
             self.at(current_position).visited = True
