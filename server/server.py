@@ -47,8 +47,8 @@ class Robot:
             print(f'{self.name} path: {path}')
         except dk.NoPathError as e:
             print(e.message)
-            print(f'falling back on current position')
-            return self.position
+            print(f'sending random step')
+            return self.random_step()
 
         if not path: # happens when the position == the target
             return self.position
